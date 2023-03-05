@@ -1,23 +1,23 @@
 #!/bin/bash
-#Install Apache and configure proxy module
-apt update && apt install -y apache2 
-a2enmod proxy 
-a2enmod proxy_http
+#Install Nginx
+apt update && apt install -y nginx 
 webapp=$1
 
-#Configure Apache conf
-cat <<EOF > /etc/apache2/sites-available/000-default.conf
-<VirtualHost *:80>
+#Configure Nginx conf
+cat <<EOF > /etc/nginx/sites-available/default
+server {
+  listen 80;
+  listen [::]:80;
 
-        ProxyPreserveHost On
-        ProxyPass / http://$webapp/
-        ProxyPassReverse / http://$webapp/
-        DocumentRoot /var/www/html
-        ErrorLog ${APACHE_LOG_DIR}/error.log
-        CustomLog ${APACHE_LOG_DIR}/access.log combined
+  server_name $webapp;
 
-</VirtualHost>
+  location / {
+      proxy_pass http://$webapp;
+      proxy_set_header X-Real-IP $remote_addr;
+
+  }
+}
 EOF
 
-#Restart Apache
-systemctl restart apache2
+#Restart Nginx
+systemctl restart nginx
