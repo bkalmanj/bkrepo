@@ -1,0 +1,39 @@
+trigger: none
+      
+pool: 
+  vmimage: ubuntu-latest
+
+variables:
+  - name: system.debug
+    value: true
+
+steps:
+- task: TerraformInstaller@0
+  inputs:
+    terraformVersion: "1.1.4"
+- task: TerraformTaskV1@0
+  displayName: "terraform init"
+  inputs: 
+    provider: "azurerm"
+    command: "init"
+    commandOptions: "-reconfigure"
+    workingDirectory: "."
+    backendServiceArm: "app-name"
+    backendAzureRmResourceGroupName: "TestFirstRG"
+    backendAzureRmStorageAccountName: "testfirstterrform"
+    backendAzureRmContainerName: "state"
+    backendAzureRmKey: "terraformj.tfstate"
+
+- task: TerraformTaskV1@0
+  displayName: "terraform Plan"
+  inputs:
+    command: "plan"
+    workingDirectory: "."
+    environmentServiceNameAzureRm: "app-name"   
+
+- task: TerraformTaskV1@0
+  displayName: "terraform apply"
+  inputs:
+    command: "apply"
+    workingDirectory: "."
+    environmentServiceNameAzureRm: "app-name"   
